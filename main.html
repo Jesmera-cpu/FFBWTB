@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buddy RPG</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background: #111; }
+
+        /* Main Game Layout */
+        #game-container { display: flex; flex-direction: column; width: 100%; height: 100%; }
+
+        /* Top 60%: The Battle Arena */
+        #battle-arena {
+            flex: 6;
+            background: linear-gradient(to bottom, #4a90e2, #50e3c2); /* Temporary bright background */
+            position: relative;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 20px;
+        }
+        .sprite-box { text-align: center; font-weight: bold; color: white; text-shadow: 1px 1px 4px #000; }
+        .character { width: 100px; height: 100px; border-radius: 20px; margin-bottom: 10px; display: flex; justify-content: center; align-items: center; font-size: 40px; }
+        #hero { background: #34495e; }
+        #boss { background: #e74c3c; width: 140px; height: 140px; font-size: 60px; }
+
+        /* Bottom 40%: The Dashboard */
+        #control-panel {
+            flex: 4;
+            background: #2c3e50;
+            border-top: 4px solid #f1c40f;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+        }
+
+        /* Dialogue Box */
+        #story-box {
+            flex: 1;
+            background: #1a252f;
+            border: 2px solid #7f8c8d;
+            border-radius: 8px;
+            color: #fff;
+            padding: 12px;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            overflow-y: auto;
+            line-height: 1.4;
+        }
+
+        /* Giant Buttons Grid */
+        #action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .game-btn {
+            background: #e67e22;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: bold;
+            padding: 18px;
+            box-shadow: 0 5px 0 #d35400;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .game-btn:active { transform: translateY(5px); box-shadow: none; }
+        .game-btn:disabled { background: #7f8c8d; box-shadow: 0 5px 0 #95a5a6; opacity: 0.5; }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- Battle Stage -->
+        <div id="battle-arena">
+            <div class="sprite-box">
+                <div id="hero" class="character">🧙‍♂️</div>
+                <div id="hero-hp">HP: 100/100</div>
+            </div>
+            <div class="sprite-box">
+                <div id="boss" class="character">🐉</div>
+                <div id="boss-hp">HP: 150/150</div>
+            </div>
+        </div>
+
+        <!-- Commands & Narrative -->
+        <div id="control-panel">
+            <div id="story-box">A wild Giggle Dragon blocks the path! What should we do, Buddy?</div>
+            <div id="action-grid">
+                <button class="game-btn" onclick="takeAction('magic')">✨ STAR SPELL</button>
+                <button class="game-btn" onclick="takeAction('heal')">🍎 YUMMY APPLE</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple local state machine for tonight's testing
+        let bossHp = 150;
+        let isMyTurn = true;
+
+        function takeAction(type) {
+            if (!isMyTurn) return;
+
+            const storyBox = document.getElementById('story-box');
+            const bossHpText = document.getElementById('boss-hp');
+
+            if (type === 'magic') {
+                bossHp -= 30;
+                if (bossHp < 0) bossHp = 0;
+                storyBox.innerHTML = "✨ <b>Buddy cast Star Spell!</b> <br>The Giggle Dragon giggles uncontrollably! (-30 HP)";
+                bossHpText.innerText = `HP: ${bossHp}/150`;
+            } else if (type === 'heal') {
+                storyBox.innerHTML = "🍎 <b>You threw a Yummy Apple!</b> <br>Everyone feels happy and strong!";
+            }
+
+            // Check if monster is down
+            if (bossHp <= 0) {
+                setTimeout(() => {
+                    storyBox.innerHTML = "🎉 <b>VICTORY!</b> <br>The Dragon fell asleep from laughing. You win!";
+                }, 1500);
+                return;
+            }
+
+            // Flip turn mock
+            isMyTurn = false;
+            toggleButtons(false);
+
+            // Simulate enemy turn automatically after 2.5 seconds
+            setTimeout(() => {
+                storyBox.innerHTML = "🐉 <b>Giggle Dragon uses Tail Tickle!</b> <br>It misses! Quick, it's your turn again!";
+                isMyTurn = true;
+                toggleButtons(true);
+            }, 2500);
+        }
+
+        function toggleButtons(enable) {
+            const buttons = document.querySelectorAll('.game-btn');
+            buttons.forEach(btn => btn.disabled = !enable);
+        }
+    </script>
+</body>
+</html>
